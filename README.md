@@ -11,7 +11,7 @@ Example:
 ./awsprofile.sh [option]
 
 where [option]:
-  \-\-help
+  --help
     Display this help
                 
   clear
