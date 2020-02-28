@@ -1,29 +1,39 @@
 #!/bin/bash
 
-AWS_PROFILES=$(cat ~/.aws/credentials | grep '\[*\]' | cut -d "[" -f2 | cut -d "]" -f1)
-
-printf "\nChoose your AWS profile:\n\n0)Unset/clear all profiles\n"
-
-COUNT=0
-
-echo "$AWS_PROFILES" | while read -r line ; do
+function list_aws_profiles() {
+  COUNT=0
+  echo "$AWS_PROFILES" | while read -r line ; do
     ((COUNT++))
     echo "${COUNT})$line"
-done
+  done
+}
+
+function set_aws_profile() {
+  export AWS_PROFILE=$1
+  printf "\nThe AWS profile ${AWS_PROFILE} has been set.\n\n"
+}
+
+function clear_aws_profile() {
+  unset AWS_PROFILE
+  printf "\nThe AWS profile has been cleared.\n\n"
+}
+
+AWS_PROFILES=$(cat ~/.aws/credentials | grep '\[*\]' | cut -d "[" -f2 | cut -d "]" -f1)
+
+printf "\nChoose your AWS profile:\n\n"
+printf "0)Clear current profile\n"
+
+list_aws_profiles
 
 printf "\nSelect profile number and press [ENTER]: "
 
 read n
 
 case $n in
-  [1-9]*) MY_AWS_PROFILE=$(echo "$AWS_PROFILES" | awk "NR==$n{print}")
-	  export AWS_PROFILE=$MY_AWS_PROFILE
-          printf "\nThe AWS profile ${AWS_PROFILE} has been set.\n\n"
+  [1-9]*) SELECTED_AWS_PROFILE=$(echo "$AWS_PROFILES" | awk "NR==$n{print}")
+	        set_aws_profile $SELECTED_AWS_PROFILE
   ;;
   0)
-          unset AWS_PROFILE
-          export -p | grep AWS #just to double check
-          printf "\nThe AWS profile has been cleared.\n\n"
+          clear_aws_profile
   ;;
 esac
-
