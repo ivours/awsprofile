@@ -1,7 +1,12 @@
 #!/bin/bash
 
+# Functions
+
 function list_aws_profiles() {
   COUNT=0
+  AWS_PROFILES=$(cat ~/.aws/credentials | grep '\[*\]' | cut -d "[" -f2 | cut -d "]" -f1)
+  printf "\nChoose your AWS profile:\n\n"
+  printf "0)Clear current profile\n"
   echo "$AWS_PROFILES" | while read -r line ; do
     ((COUNT++))
     echo "${COUNT})$line"
@@ -18,22 +23,21 @@ function clear_aws_profile() {
   printf "\nThe AWS profile has been cleared.\n\n"
 }
 
-AWS_PROFILES=$(cat ~/.aws/credentials | grep '\[*\]' | cut -d "[" -f2 | cut -d "]" -f1)
+function select_option() {
+  printf "\nSelect option number and press [ENTER]: "
+  read n
+  
+  case $n in
+    [1-9]*) SELECTED_AWS_PROFILE=$(echo "$AWS_PROFILES" | awk "NR==$n{print}")
+            set_aws_profile $SELECTED_AWS_PROFILE
+    ;;
+    0)
+            clear_aws_profile
+    ;;
+  esac
+}
 
-printf "\nChoose your AWS profile:\n\n"
-printf "0)Clear current profile\n"
+# Main
 
 list_aws_profiles
-
-printf "\nSelect profile number and press [ENTER]: "
-
-read n
-
-case $n in
-  [1-9]*) SELECTED_AWS_PROFILE=$(echo "$AWS_PROFILES" | awk "NR==$n{print}")
-	        set_aws_profile $SELECTED_AWS_PROFILE
-  ;;
-  0)
-          clear_aws_profile
-  ;;
-esac
+select_option
